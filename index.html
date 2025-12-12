@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pediatrics Hematology Quiz – 100 Questions</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  body{font-family:Arial;background:#f5f7fa;padding:20px;}
+  .box{max-width:650px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+  h1{text-align:center;font-size:22px;margin-bottom:10px;}
+  .question{font-size:18px;margin-bottom:10px;font-weight:bold;}
+.option{
+  display:block;      /* يجعل كل اختيار في سطر مستقل */
+  width:100%;         /* يمدّ الاختيار لعرض الصندوق */
+  margin:10px 0;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #e2e8f0;
+  cursor:pointer;
+}
+
+  .option input{margin-right:8px;}
+  #nextBtn,#startBtn{width:100%;padding:12px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:16px;margin-top:10px;cursor:pointer;}
+  #nextBtn:disabled{background:#94a3b8;cursor:not-allowed;}
+  #feedback{margin-top:10px;font-weight:bold;}
+  .correct{color:#16a34a;}
+  .wrong{color:#dc2626;}
+  #finalBox{display:none;text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="box" id="startBox">
+  <h1>Pediatrics Hematology Quiz (100 Questions)</h1>
+  <p>Please enter your name to begin:</p>
+  <input id="userName" type="text" placeholder="Your name" style="width:100%;padding:10px;border-radius:6px;border:1px solid #cbd5e1;">
+  <button id="startBtn">Start Quiz</button>
+</div>
+
+<div class="box" id="quizBox" style="display:none;">
+  <div id="qNumber"></div>
+  <div id="qText" class="question"></div>
+  <div id="options"></div>
+  <div id="feedback"></div>
+  <button id="nextBtn" disabled>Next</button>
+</div>
+
+<div class="box" id="finalBox">
+  <h2>Your Score</h2>
+  <div id="scoreText"></div>
+</div>
+
+<script>
+// ======================
+// YOUR GOOGLE SCRIPT URL
+// ======================
+const GOOGLE_SCRIPT_URL = "PUT_YOUR_SCRIPT_URL_HERE";
+
+// =============================
+// 100 PEDIATRIC HEMATOLOGY MCQ
+// =============================
+const questions = [
+ { id: 1, text: '1. What percentage of blood volume is typically composed of plasma?', choices: ['40-45%', '55%', '65%', '75%'], correct: 1, ref: 'Page 2' },
+  { id: 2, text: '2. Which of the following is a blood disorder characterized by a decrease in red blood cells or hemoglobin?', choices: ['Leukocytosis', 'Thrombocythemia', 'Anemia', 'Erythrocytosis'], correct: 2, ref: 'Page 10' },
+  { id: 3, text: '3. What is the primary function of hemoglobin?', choices: ['Fight infection', 'Carry oxygen', 'Clot blood', 'Transport nutrients'], correct: 1, ref: 'Page 6' },
+  { id: 4, text: '4. Which of the following is a common type of anemia?', choices: ['Leukocytosis', 'Iron deficiency anemia', 'Thrombocythemia', 'Erythrocytosis'], correct: 1, ref: 'Page 16' },
+  { id: 5, text: '5. In iron deficiency anemia, what is a common cause in infants?', choices: ['Excessive iron intake', 'Inadequate dietary intake', 'Genetic mutation', 'Autoimmune disorder'], correct: 1, ref: 'Page 21' },
+  { id: 6, text: '6. Which diagnostic test reveals the amount of iron stored in the body?', choices: ['Complete blood count', 'Serum ferritin', 'Hemoglobin electrophoresis', 'Bone marrow biopsy'], correct: 1, ref: 'Page 27' },
+  { id: 7, text: '7. What is a common side effect of oral iron therapy?', choices: ['Red urine', 'Black stools', 'Yellow skin', 'Blue sclera'], correct: 1, ref: 'Page 34' },
+  { id: 8, text: '8. In sickle cell anemia, what protects the infant in the first few months?', choices: ['Maternal antibodies', 'Hemoglobin F', 'Iron supplements', 'Blood transfusions'], correct: 1, ref: 'Page 47' },
+  { id: 9, text: '9. What is the normal range for cellular components in blood?', choices: ['30-35%', '40-45%', '50-55%', '60-65%'], correct: 1, ref: 'Page 3' },
+  { id: 10, text: '10. What is a diagnostic test for sickle cell anemia?', choices: ['Serum ferritin', 'Hemoglobin electrophoresis', 'Complete blood count only', 'Bone marrow aspiration'], correct: 1, ref: 'Page 54' },
+  { id: 11, text: '11. What is leukemia?', choices: ['A benign tumor of white blood cells', 'Malignant disease of blood forming organs', 'An autoimmune disorder', 'A type of anemia'], correct: 1, ref: 'Page 1' },
+  { id: 12, text: '12. What is the most common form of cancer in children?', choices: ['Brain tumors', 'Leukemia', 'Lymphomas', 'Bone cancer'], correct: 1, ref: 'Page 2' },
+  { id: 13, text: '13. What are the main consequences of leukemia?', choices: ['Hypertension, edema, proteinuria', 'Anemia, infections, bleeding', 'Polyuria, polydipsia, polyphagia', 'Fever, rash, joint pain'], correct: 1, ref: 'Page 8' },
+  { id: 14, text: '14. What is the goal of leukemia treatment?', choices: ['Palliation', 'Complete remission', 'Pain management', 'Infection control'], correct: 1, ref: 'Page 19' },
+  { id: 15, text: '15. What is the primary treatment for acute lymphatic leukemia?', choices: ['Radiation therapy', 'Chemotherapy', 'Surgery', 'Blood transfusion'], correct: 1, ref: 'Page 22' },
+  { id: 16, text: '16. Which diagnostic procedure involves taking a sample of bone marrow?', choices: ['Lumbar puncture', 'Bone marrow aspiration', 'CT scan', 'Lymph node biopsy'], correct: 1, ref: 'Page 15' },
+  { id: 17, text: '17. Which of the following is a common side effect of chemotherapy?', choices: ['Hypertension', 'Hyperglycemia', 'Hair loss', 'Weight gain'], correct: 2, ref: 'Page 25' },
+  { id: 18, text: '18. What is the purpose of the maintenance phase in leukemia treatment?', choices: ['To achieve remission', 'To prevent relapse in CNS', 'To prepare for transplant', 'To manage side effects'], correct: 1, ref: 'Page 35' },
+  { id: 19, text: '19. What is a risk factor for leukemia?', choices: ['High fiber diet', 'Exposure to radiation', 'Regular exercise', 'Vitamin C supplementation'], correct: 1, ref: 'Page 3' },
+  { id: 20, text: '20. What is the purpose of lumbar puncture in leukemia?', choices: ['To assess bone marrow', 'To check for CNS involvement', 'To measure blood counts', 'To detect lung metastasis'], correct: 1, ref: 'Page 16' },
+  { id: 21, text: '21. What is the definition of a premature newborn?', choices: ['Born after 42 weeks', 'Born between 38-42 weeks', 'Born before 37 weeks', 'Born with low birth weight only'], correct: 2, ref: 'Page 1' },
+  { id: 22, text: '22. Which of the following is a characteristic of a premature newborn?', choices: ['Large head in proportion to body', 'Excessive subcutaneous fat', 'Firm ear cartilage', 'Abundant vernix caseosa'], correct: 0, ref: 'Page 5' },
+  { id: 23, text: '23. What is a common respiratory problem in prematurity?', choices: ['Excessive surfactant', 'Deficient surfactant levels', 'Overdeveloped alveoli', 'Wide respiratory passages'], correct: 1, ref: 'Page 9' },
+  { id: 24, text: '24. Why is the premature newborn at risk for hypoglycemia?', choices: ['Excessive feeding', 'Predisposition due to CNS immaturity', 'Overproduction of insulin', 'High birth weight'], correct: 1, ref: 'Page 11' },
+  { id: 25, text: '25. What is a nursing consideration for premature newborns?', choices: ['Standardized care for all', 'Individualized care', 'Minimal monitoring', 'Early discharge'], correct: 1, ref: 'Page 15' },
+  { id: 26, text: '26. What is meningitis?', choices: ['Inflammation of the heart muscle', 'Inflammation of the meninges', 'Inflammation of the kidneys', 'Inflammation of the liver'], correct: 1, ref: 'Page 1' },
+  { id: 27, text: '27. Which type of meningitis is more virulent?', choices: ['Viral', 'Bacterial', 'Fungal', 'Parasitic'], correct: 1, ref: 'Page 1' },
+  { id: 28, text: '28. In infants, what is a symptom of meningitis?', choices: ['Bulging fontanel', 'Hypertension', 'Polyuria', 'Weight gain'], correct: 0, ref: 'Page 4' },
+  { id: 29, text: '29. What is Kernig\'s sign?', choices: ['Neck stiffness', 'Resistance to leg extension when hip is flexed', 'Hip flexion upon neck flexion', 'Photophobia'], correct: 1, ref: 'Page 6' },
+  { id: 30, text: '30. What is a common complication of meningitis?', choices: ['Hearing loss', 'Improved vision', 'Weight gain', 'Hyperactivity'], correct: 0, ref: 'Page 17' },
+  { id: 31, text: '31. What is acute glomerulonephritis?', choices: ['Inflammation of the bladder', 'Inflammation of the glomeruli due to streptococcal infection', 'Inflammation of the ureters', 'Inflammation of the renal pelvis'], correct: 1, ref: 'Page 1' },
+  { id: 32, text: '32. What is the most common age for AGN?', choices: ['Under 1 year', '1-4 years', '5-15 years', 'Over 20 years'], correct: 2, ref: 'Page 2' },
+  { id: 33, text: '33. What is a common presenting symptom of AGN?', choices: ['Polyuria', 'Hematuria', 'Nocturia', 'Glycosuria'], correct: 1, ref: 'Page 4' },
+  { id: 34, text: '34. What is a common complication of AGN?', choices: ['Kidney failure', 'Liver cirrhosis', 'Heart valve disease', 'Lung fibrosis'], correct: 0, ref: 'Page 7' },
+  { id: 35, text: '35. What is nephrotic syndrome characterized by?', choices: ['Hypertension, hematuria', 'Massive proteinuria, hypoalbuminemia, hyperlipidemia, edema', 'Polyuria, polydipsia, polyphagia', 'Fever, rash, joint pain'], correct: 1, ref: 'Page 8' },
+  { id: 36, text: '36. What is the typical age for nephrotic syndrome?', choices: ['Under 1 year', '2-3 years', '5-10 years', 'Adolescence'], correct: 1, ref: 'Page 9' },
+  { id: 37, text: '37. What is a common clinical manifestation of nephrotic syndrome?', choices: ['Hypertension', 'Hematuria', 'Edema', 'Polyuria'], correct: 2, ref: 'Page 11' },
+  { id: 38, text: '38. What is a complication of nephrotic syndrome?', choices: ['Hypoglycemia', 'Increased immunity', 'Infection', 'Weight loss'], correct: 2, ref: 'Page 13' },
+  { id: 39, text: '39. In the comparison, which condition has marked hypertension?', choices: ['Nephrotic syndrome', 'Acute glomerulonephritis', 'Both', 'Neither'], correct: 1, ref: 'Page 22' },
+  { id: 40, text: '40. In nephrotic syndrome, what is a key nursing intervention?', choices: ['Encourage high salt diet', 'Monitor fluid intake and output', 'Restrict protein intake', 'Administer diuretics routinely'], correct: 1, ref: 'Page 15' },
+  { id: 41, text: '41. What is rheumatic fever?', choices: ['A viral infection of the joints', 'An inflammatory disease of connective tissue', 'A bacterial infection of the heart valves', 'A fungal infection of the skin'], correct: 1, ref: 'Page 1' },
+  { id: 42, text: '42. What is the etiology of rheumatic fever?', choices: ['Autoimmune reaction to streptococcal infection', 'Direct bacterial invasion', 'Vitamin deficiency', 'Genetic disorder only'], correct: 0, ref: 'Page 2' },
+  { id: 43, text: '43. Which is a major manifestation of rheumatic fever?', choices: ['Fever only', 'Carditis', 'Headache', 'Cough'], correct: 1, ref: 'Page 4' },
+  { id: 44, text: '44. What is the drug of choice for treating streptococcal infection in rheumatic fever?', choices: ['Aspirin', 'Penicillin', 'Erythromycin', 'Corticosteroids'], correct: 1, ref: 'Page 11' },
+  { id: 45, text: '45. What is a complication of rheumatic fever?', choices: ['Chronic valvular disease', 'Liver cirrhosis', 'Renal failure', 'Lung cancer'], correct: 0, ref: 'Page 17' },
+  { id: 46, text: '46. What is diabetes mellitus?', choices: ['A disorder of the adrenal gland', 'A syndrome of disturbed energy metabolism due to insulin deficiency', 'A disease of the thyroid gland', 'A condition of excessive growth hormone'], correct: 1, ref: 'Page 1' },
+  { id: 47, text: '47. What is the pathophysiology of type 1 diabetes?', choices: ['Insulin resistance', 'Autoimmune destruction of beta cells', 'Excessive glucagon production', 'Defective insulin receptors'], correct: 1, ref: 'Page 3' },
+  { id: 48, text: '48. What are the classic symptoms of diabetes?', choices: ['Fever, cough, sore throat', 'Polyuria, polydipsia, polyphagia', 'Edema, hypertension, proteinuria', 'Jaundice, dark urine, pale stools'], correct: 1, ref: 'Page 11' },
+  { id: 49, text: '49. What is the primary treatment for type 1 diabetes in children?', choices: ['Oral hypoglycemics', 'Insulin', 'Diet alone', 'Exercise only'], correct: 1, ref: 'Page 15' },
+  { id: 50, text: '50. What is a rapid-acting insulin?', choices: ['NPH', 'Regular insulin', 'Insulin aspart', 'Ultralente'], correct: 2, ref: 'Page 16' },
+  { id: 51, text: '51. What is a common adverse effect of insulin?', choices: ['Hyperglycemia', 'Hypoglycemia', 'Weight gain only', 'Hypertension'], correct: 1, ref: 'Page 19' },
+  { id: 52, text: '52. What is diabetic ketoacidosis characterized by?', choices: ['Hypoglycemia, hypokalemia', 'Hyperglycemia, ketonemia, acidosis', 'Hyponatremia, edema', 'Hyperinsulinism, weight gain'], correct: 1, ref: 'Page 26' },
+  { id: 53, text: '53. What is the treatment for severe hypoglycemia?', choices: ['Oral glucose', 'Dextrose IV', 'Glucagon IM only', 'Insulin injection'], correct: 1, ref: 'Page 25' },
+  { id: 54, text: '54. What is a risk factor for cerebral edema in DKA?', choices: ['Slow fluid administration', 'Young age', 'High sodium levels', 'No insulin therapy'], correct: 1, ref: 'Page 30' },
+  { id: 55, text: '55. What is Kussmaul respiration?', choices: ['Shallow breathing', 'Deep rapid breathing in DKA', 'Cheyne-Stokes breathing', 'Apneic episodes'], correct: 1, ref: 'Page 10' },
+  { id: 56, text: '56. What is the initial fluid for DKA management?', choices: ['Distilled water', 'Normal saline', '5% dextrose', 'Half-normal saline'], correct: 1, ref: 'Page 28' },
+  { id: 57, text: '57. What is pneumonia?', choices: ['Inflammation of the pleura', 'Inflammation of the lung parenchyma', 'Inflammation of the bronchi only', 'Inflammation of the nasal cavity'], correct: 1, ref: 'Page 5' },
+  { id: 58, text: '58. What is the most common cause of viral pneumonia in infants?', choices: ['Adenovirus', 'Influenza virus', 'Respiratory Syncytial Virus (RSV)', 'Parainfluenza virus'], correct: 2, ref: 'Page 7' },
+  { id: 59, text: '59. What is a common bacterial pathogen for pneumonia?', choices: ['Rotavirus', 'Pneumococcus', 'Candida albicans', 'Giardia'], correct: 1, ref: 'Page 8' },
+  { id: 60, text: '60. What is a severe symptom of pneumonia?', choices: ['Mild cough', 'Cyanosis', 'Low-grade fever', 'Runny nose'], correct: 1, ref: 'Page 16' },
+  { id: 61, text: '61. What is bronchopneumonia?', choices: ['Inflammation of the pleura', 'Consolidated patches in terminal bronchioles', 'Involvement of entire lung lobes', 'Interstitial inflammation only'], correct: 1, ref: 'Page 11' },
+  { id: 62, text: '62. What is a high risk neonate?', choices: ['Newborn with normal birth weight', 'Newborn with greater chance of morbidity/mortality', 'Newborn born at term', 'Newborn without any medical issues'], correct: 1, ref: 'Page 1' },
+  { id: 63, text: '63. What is a maternal factor for high risk neonate?', choices: ['Adequate antenatal care', 'Diabetes mellitus', 'Normal weight gain', 'Uncomplicated labor'], correct: 1, ref: 'Page 3' },
+  { id: 64, text: '64. How is a preterm neonate defined?', choices: ['Born after 42 weeks', 'Born between 38-42 weeks', 'Born before 38 weeks', 'Birth weight less than 2500g only'], correct: 2, ref: 'Page 6' },
+  { id: 65, text: '65. What is small for gestational age?', choices: ['Above 90th percentile', 'Between 10th and 90th percentile', 'Below 10th percentile', 'Exactly 50th percentile'], correct: 2, ref: 'Page 7' },
+  { id: 66, text: '66. What is a characteristic of a high risk infant?', choices: ['Strong reflexes', 'Weak reflexes', 'Excessive subcutaneous fat', 'Firm skin'], correct: 1, ref: 'Page 14' },
+  { id: 67, text: '67. What is the function of thyroid hormones?', choices: ['Regulate blood glucose', 'Regulate metabolic rate', 'Control calcium levels', 'Promote growth hormone release'], correct: 1, ref: 'Page 3' },
+  { id: 68, text: '68. What is Graves disease?', choices: ['Hypothyroidism', 'Hyperthyroidism', 'Adrenal insufficiency', 'Diabetes insipidus'], correct: 1, ref: 'Page 4' },
+  { id: 69, text: '69. What is a cardinal sign of hyperthyroidism?', choices: ['Weight gain', 'Bradycardia', 'Emotional lability', 'Cold intolerance'], correct: 2, ref: 'Page 5' },
+  { id: 70, text: '70. What is thyroid storm?', choices: ['Mild thyroid dysfunction', 'Acute severe hyperthyroidism', 'Chronic hypothyroidism', 'Thyroid cancer'], correct: 1, ref: 'Page 7' },
+  { id: 71, text: '71. What is the treatment for hyperthyroidism?', choices: ['Insulin', 'Antithyroid drugs', 'Growth hormone', 'Mineralocorticoids'], correct: 1, ref: 'Page 8' },
+  { id: 72, text: '72. What is congenital hypothyroidism?', choices: ['Thyroid hormone deficiency at birth', 'Excessive thyroid hormone at birth', 'Autoimmune thyroiditis', 'Thyroid nodule'], correct: 0, ref: 'Page 16' },
+  { id: 73, text: '73. What is a symptom of congenital hypothyroidism in neonates?', choices: ['Hyperactivity', 'Prolonged jaundice', 'Weight loss', 'Diarrhea'], correct: 1, ref: 'Page 19' },
+  { id: 74, text: '74. How is congenital hypothyroidism diagnosed?', choices: ['Urine test', 'Neonatal screening: TSH and T4', 'CT scan of brain', 'ECG'], correct: 1, ref: 'Page 27' },
+  { id: 75, text: '75. What is the treatment for congenital hypothyroidism?', choices: ['Surgery', 'Radioiodine', 'Thyroxine tablet', 'Antithyroid drugs'], correct: 2, ref: 'Page 28' },
+  { id: 76, text: '76. What is colic?', choices: ['A type of diarrhea', 'Crying for more than 3 hours per day, more than 3 days per week, for 3 weeks', 'A respiratory condition', 'A skin rash'], correct: 1, ref: 'Page 8' },
+  { id: 77, text: '77. What is a cause of colic?', choices: ['Overfeeding', 'Milk allergy', 'Excessive sleeping', 'Dehydration'], correct: 1, ref: 'Page 9' },
+  { id: 78, text: '78. How is diarrhea defined?', choices: ['Decreased stool frequency', 'Watery stool or increased frequency', 'Hard, dry stools', 'Blood in stool only'], correct: 1, ref: 'Page 15' },
+  { id: 79, text: '79. What is the most common cause of acute watery diarrhea in children?', choices: ['Bacteria', 'Rotavirus', 'Parasites', 'Food allergies'], correct: 1, ref: 'Page 19' },
+  { id: 80, text: '80. What is dysentery?', choices: ['Watery stool without blood', 'Blood in stool', 'Stool with mucus only', 'Diarrhea lasting less than 2 days'], correct: 1, ref: 'Page 23' },
+  { id: 81, text: '81. What is persistent diarrhea?', choices: ['Lasts less than 7 days', 'Lasts at least 14 days', 'Lasts 1 month', 'Intermittent diarrhea'], correct: 1, ref: 'Page 23' },
+  { id: 82, text: '82. What is the main consequence of watery diarrhea?', choices: ['Weight gain', 'Dehydration', 'Hypernatremia', 'Constipation'], correct: 1, ref: 'Page 24' },
+  { id: 83, text: '83. What is the treatment plan for severe dehydration?', choices: ['Plan A: home fluids', 'Plan B: ORS', 'Plan C: IV fluids', 'Plan D: antibiotics only'], correct: 2, ref: 'Page 30' },
+  { id: 84, text: '84. What is the composition of ORS?', choices: ['Sodium, potassium, chloride, citrate, glucose', 'Only sodium and water', 'Only glucose', 'Calcium, magnesium, zinc'], correct: 0, ref: 'Page 31' },
+  { id: 85, text: '85. What is not recommended in the drug therapy for diarrhea?', choices: ['Antibiotics for dysentery', 'ORS', 'Antidiarrheal drugs', 'Zinc supplementation'], correct: 2, ref: 'Page 32' },
+  { id: 86, text: '86. What is a warning sign of severe diarrhea?', choices: ['Mild thirst', 'Blood in stool', 'Normal urine output', 'Slight fatigue'], correct: 1, ref: 'Page 34' },
+  { id: 87, text: '87. What is dehydration?', choices: ['Excess body fluid', 'Lack of enough fluid in the body', 'High sodium levels', 'Low potassium levels'], correct: 1, ref: 'Page 39' },
+  { id: 88, text: '88. What is a sign of dehydration?', choices: ['Tears present', 'Sunken eyes', 'Moist mucous membranes', 'Normal skin turgor'], correct: 1, ref: 'Page 41' },
+  { id: 89, text: '89. What is constipation?', choices: ['Increased stool frequency', 'Decrease in frequency of bowel movements, difficult or painful', 'Watery stools', 'Blood in stool'], correct: 1, ref: 'Page 51' },
+  { id: 90, text: '90. What is a cause of constipation?', choices: ['High fiber diet', 'Adequate fluids', 'Lack of exercise', 'Frequent bowel habits'], correct: 2, ref: 'Page 52' },
+  { id: 91, text: '91. What is GERD?', choices: ['Gastric acid flowing back into the esophagus', 'A disorder of the large intestine', 'A type of colitis', 'An allergic reaction to food'], correct: 0, ref: 'Page 58' },
+  { id: 92, text: '92. What is the function of platelets?', choices: ['Carry oxygen', 'Fight infection', 'Clot blood', 'Transport hormones'], correct: 2, ref: 'Page 3' },
+  { id: 93, text: '93. In sickle cell anemia, what causes the sickling?', choices: ['Abnormal hemoglobin', 'Iron deficiency', 'Vitamin B12 deficiency', 'Excess oxygen'], correct: 0, ref: 'Page 43' },
+  { id: 94, text: '94. Which of the following is a symptom of leukemia in children?', choices: ['Bone pain', 'Hypertension', 'Polyuria', 'Weight gain'], correct: 0, ref: 'Page 10' },
+  { id: 95, text: '95. In a bone marrow transplant, what are stem cells?', choices: ['Mature blood cells', 'Cells that can divide and develop into many kinds of cells', 'Only red blood cell precursors', 'Only white blood cells'], correct: 1, ref: 'Page 29' },
+  { id: 96, text: '96. What is a common complication of pneumonia?', choices: ['Pleural effusion', 'Diabetes mellitus', 'Rheumatic fever', 'Hyperthyroidism'], correct: 0, ref: 'Page 30' },
+  { id: 97, text: '97. What is the goal of diabetes management?', choices: ['Cure the disease', 'Maintain blood glucose levels', 'Avoid all carbohydrates', 'Prevent all physical activity'], correct: 1, ref: 'Page 14' },
+  { id: 98, text: '98. What is a complication of overtreatment in hypothyroidism?', choices: ['Delayed bone age', 'Premature skull fusion', 'Short stature', 'Obesity'], correct: 1, ref: 'Page 31' },
+  { id: 99, text: '99. What is the role of a pediatric nurse in endocrine disorders?', choices: ['Only medication administration', 'Educator, direct care provider, advocate', 'Only diagnostic testing', 'Surgical assistance only'], correct: 1, ref: 'Page 36' },
+  { id: 100, text: '100. What is the classification of dehydration based on serum sodium level that is most common?', choices: ['Hyponatremic', 'Hypernatremic', 'Isonatremic', 'Normokalemic'], correct: 2, ref: 'Page 44' }
+];
+
+// -------------------------------
+// QUIZ LOGIC
+// -------------------------------
+let idx = 0;
+let score = 0;
+let name = "";
+
+const startBox = document.getElementById("startBox");
+const quizBox = document.getElementById("quizBox");
+const finalBox = document.getElementById("finalBox");
+const qNumber = document.getElementById("qNumber");
+const qText = document.getElementById("qText");
+const optionsDiv = document.getElementById("options");
+const feedback = document.getElementById("feedback");
+const nextBtn = document.getElementById("nextBtn");
+
+document.getElementById("startBtn").onclick = ()=>{
+  name = document.getElementById("userName").value.trim();
+  if(!name){ alert("Please enter your name"); return; }
+  startBox.style.display="none";
+  quizBox.style.display="block";
+  loadQ();
+};
+
+function loadQ(){
+  nextBtn.disabled = true;
+  feedback.innerHTML = "";
+  const q = questions[idx];
+
+  qNumber.innerHTML = `Question ${idx+1} of ${questions.length}`;
+  qText.innerHTML = q.text;
+
+  optionsDiv.innerHTML = "";
+  q.choices.forEach((choice,i)=>{
+    const opt = document.createElement("label");
+    opt.className="option";
+    opt.innerHTML = `<input type="radio" name="opt" value="${i}"> ${choice}`;
+    opt.onclick = ()=>selectAnswer(i);
+    optionsDiv.appendChild(opt);
+  });
+}
+
+function selectAnswer(i){
+  const correct = questions[idx].correct;
+  if(i===correct){
+    feedback.innerHTML = "<span class='correct'>Correct ✔</span>";
+    score++;
+  } else {
+    feedback.innerHTML = "<span class='wrong'>Incorrect ✘</span>";
+  }
+  nextBtn.disabled = false;
+}
+
+nextBtn.onclick = ()=>{
+  idx++;
+  if(idx < questions.length){
+    loadQ();
+  } else {
+    finishQuiz();
+  }
+};
+
+function finishQuiz(){
+  quizBox.style.display="none";
+  finalBox.style.display="block";
+  document.getElementById("scoreText").innerHTML =
+    `${name}, you scored ${score} / ${questions.length}`;
+
+  fetch(GOOGLE_SCRIPT_URL,{
+    method:"POST",
+    mode:"no-cors",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      name:name,
+      score:score,
+      total:questions.length,
+      percent:Math.round(score/questions.length*100),
+      answers:questions.map(q=>({
+        question:q.text,
+        correct:q.correct
+      }))
+    })
+  });
+}
+</script>
+
+</body>
+</html>
